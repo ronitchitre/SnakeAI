@@ -5,11 +5,15 @@ import classes
 from pygame.math import Vector2
 
 # initialize pygame
+pygame.mixer.init()
+pygame.mixer.music.load("Sound/star-wars-theme-song.mp3")
+pygame.mixer.music.play()
+pygame.mixer.pre_init(44100, -16, 2, 512)
 pygame.init()
 
 # game variables
-cell_size = 20
-cell_number = 40
+cell_size = 40
+cell_number = 20
 gameWindow = pygame.display.set_mode((cell_size * cell_number, cell_size * cell_number))
 
 clock = pygame.time.Clock()
@@ -40,6 +44,10 @@ class Main:
             self.food = classes.Food()
             self.snake.add_block()
             self.score += 1
+            self.snake.crunch_sound.play()
+            for block in self.snake.body[1:]:
+                if block == self.food.pos:
+                    self.food = classes.Food()
 
 
 # function to print text on screen

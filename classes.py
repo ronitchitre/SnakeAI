@@ -3,8 +3,8 @@ import colors
 from pygame.math import Vector2
 from random import randint
 
-cell_size = 20
-cell_number = 30
+cell_size = 40
+cell_number = 20
 
 
 class Food:
@@ -12,7 +12,7 @@ class Food:
         self.x = randint(0, cell_number - 1)
         self.y = randint(0, cell_number - 1)
         self.pos = Vector2(self.x, self.y)
-        self.pic = pygame.image.load("food.png", ).convert_alpha()
+        self.pic = pygame.image.load("Graphics/apple.png").convert_alpha()
 
     def draw_food(self, gameWindow):
         food_rect = pygame.Rect(int(self.pos.x * cell_size), int(self.pos.y * cell_size), cell_size, cell_size)
@@ -23,26 +23,28 @@ class Snake:
     def __init__(self):
         self.body = [Vector2(15, 15), Vector2(15, 16), Vector2(15, 17)]
         self.direction = Vector2(0, 0)
-        self.head_up = pygame.image.load("snakehead_up.png").convert_alpha()
-        self.head_down = pygame.image.load("snakehead_down.png").convert_alpha()
-        self.head_left = pygame.image.load("snakehead_left.png").convert_alpha()
-        self.head_right = pygame.image.load("snakehead_right.png").convert_alpha()
+        self.head_up = pygame.image.load("Graphics/head_up.png").convert_alpha()
+        self.head_down = pygame.image.load("Graphics/head_down.png").convert_alpha()
+        self.head_left = pygame.image.load("Graphics/head_left.png").convert_alpha()
+        self.head_right = pygame.image.load("Graphics/head_right.png").convert_alpha()
 
-        self.bod_ver = pygame.image.load("snake_bod_ver.png").convert_alpha()
-        self.bod_hor = pygame.image.load("snake_bod_hor.png").convert_alpha()
+        self.bod_ver = pygame.image.load("Graphics/body_vertical.png").convert_alpha()
+        self.bod_hor = pygame.image.load("Graphics/body_horizontal.png").convert_alpha()
 
-        self.tail_up = pygame.image.load("snake_tail_-y.png").convert_alpha()
-        self.tail_down = pygame.image.load("snake_tail_+y.png").convert_alpha()
-        self.tail_left = pygame.image.load("snake_tail_-x.png").convert_alpha()
-        self.tail_right = pygame.image.load("snake_tail_+x.png").convert_alpha()
+        self.tail_up = pygame.image.load("Graphics/tail_down.png").convert_alpha()
+        self.tail_down = pygame.image.load("Graphics/tail_up.png").convert_alpha()
+        self.tail_left = pygame.image.load("Graphics/tail_right.png").convert_alpha()
+        self.tail_right = pygame.image.load("Graphics/tail_left.png").convert_alpha()
 
-        self.snake_corner1 = pygame.image.load("snake_corner_1.png").convert_alpha()
-        self.snake_corner2 = pygame.image.load("snake_corner_2.png").convert_alpha()
-        self.snake_corner3 = pygame.image.load("snake_corner_3.png").convert_alpha()
-        self.snake_corner4 = pygame.image.load("snake_corner_4.png").convert_alpha()
+        self.snake_corner1 = pygame.image.load("Graphics/body_bl.png").convert_alpha()
+        self.snake_corner2 = pygame.image.load("Graphics/body_br.png").convert_alpha()
+        self.snake_corner3 = pygame.image.load("Graphics/body_tr.png").convert_alpha()
+        self.snake_corner4 = pygame.image.load("Graphics/body_tl.png").convert_alpha()
 
-        self.head = pygame.image.load("snakehead_up.png").convert_alpha()
-        self.tail = pygame.image.load("snake_tail_-y.png").convert_alpha()
+        self.head = pygame.image.load("Graphics/head_up.png").convert_alpha()
+        self.tail = pygame.image.load("Graphics/tail_up.png").convert_alpha()
+
+        self.crunch_sound = pygame.mixer.Sound("Sound/crunch.wav")
 
     def draw_snake(self, gameWindow):
         self.update_head()
@@ -84,7 +86,7 @@ class Snake:
         self.body = body_copy
 
     def check_death(self):
-        if self.body[0].x > 38 or self.body[0].x < 1 or self.body[0].y > 38 or self.body[0].y < 1:
+        if self.body[0].x > 19 or self.body[0].x < 0 or self.body[0].y > 19 or self.body[0].y < 0:
             return True
         elif self.body[0] in self.body[1:] and self.direction != Vector2(0, 0):
             return True
