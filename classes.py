@@ -21,7 +21,7 @@ class Food:
 
 class Snake:
     def __init__(self):
-        self.body = [Vector2(15, 15), Vector2(15, 16), Vector2(15, 17)]
+        self.body = [Vector2(10, 10), Vector2(10, 11), Vector2(10, 12)]
         self.direction = Vector2(0, 0)
         self.head_up = pygame.image.load("Graphics/head_up.png").convert_alpha()
         self.head_down = pygame.image.load("Graphics/head_down.png").convert_alpha()

@@ -28,10 +28,12 @@ class Main:
         self.score = 0
         bg_img = pygame.image.load("snakebg.jpg")
         self.bg_img = pygame.transform.scale(bg_img, (cell_number*cell_size, cell_number*cell_size))
+        self.game_start = False
 
     def update(self):
-        self.snake.move_snake()
-        self.check_collision()
+        if self.game_start:
+            self.snake.move_snake()
+            self.check_collision()
 
     def draw_stuff(self):
         gameWindow.blit(self.bg_img, (0,0))
@@ -79,6 +81,7 @@ while not game_quite:
             if game_over:
                 main_game = Main()
         if event.type == pygame.KEYDOWN:
+            main_game.game_start = True
             if event.key == pygame.K_DOWN:
                 if main_game.snake.direction.y == 0:
                     main_game.snake.direction = Vector2(0, 1)
