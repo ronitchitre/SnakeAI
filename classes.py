@@ -86,7 +86,7 @@ class Snake:
         self.body = body_copy
 
     def check_death(self):
-        if self.body[0].x > 19 or self.body[0].x < 0 or self.body[0].y > 19 or self.body[0].y < 0:
+        if self.body[0].x > (cell_number - 1) or self.body[0].x < 0 or self.body[0].y > (cell_number - 1) or self.body[0].y < 0:
             return True
         elif self.body[0] in self.body[1:] and self.direction != Vector2(0, 0):
             return True
