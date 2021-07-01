@@ -80,6 +80,37 @@ class Snake:
         body_copy.insert(0, body_copy[0] + self.direction)
         self.body = body_copy
 
+    def move_snake_backend(self, action):
+        if action == "front":
+            body_copy = self.body[:-1]
+            body_copy.insert(0, body_copy[0] + self.direction)
+            return body_copy
+        elif action == "right":
+            new_direction = self.direction.rotate(90)
+            body_copy = self.body[:-1]
+            body_copy.insert(0, body_copy[0] + new_direction)
+            return body_copy
+        elif action == "left":
+            new_direction = self.direction.rotate(-90)
+            body_copy = self.body[:-1]
+            body_copy.insert(0, body_copy[0] + new_direction)
+            return body_copy
+        elif action = "topleft":
+            body_copy = self.body[:-1]
+            body_copy.insert(0, body_copy[0] + self.direction)
+            new_direction = self.direction.rotate(-90)
+            body_copy = self.body[:-1]
+            body_copy.insert(0, body_copy[0] + new_direction)
+            return body_copy
+        elif action = "topright":
+            body_copy = self.body[:-1]
+            body_copy.insert(0, body_copy[0] + self.direction)
+            new_direction = self.direction.rotate(90)
+            body_copy = self.body[:-1]
+            body_copy.insert(0, body_copy[0] + new_direction)
+            return body_copy
+    
+
     def add_block(self):
         body_copy = self.body[:]
         body_copy.insert(0, body_copy[0] + self.direction)
@@ -87,11 +118,11 @@ class Snake:
 
     def check_death(self):
         if self.body[0].x > (cell_number - 1) or self.body[0].x < 0 or self.body[0].y > (cell_number - 1) or self.body[0].y < 0:
-            return True
+            return 1
         elif self.body[0] in self.body[1:] and self.direction != Vector2(0, 0):
-            return True
+            return 1
         else:
-            return False
+            return 0
 
     def update_head(self):
         if self.direction == Vector2(1, 0):

@@ -78,7 +78,8 @@ while not game_quite:
             game_quite = True
         if event.type == SCREEN_UPDATE:
             main_game.update()
-            game_over = main_game.snake.check_death()
+            # game_over = main_game.snake.check_death()
+            game_over = main_game.snake.check_death() is 1
             if game_over:
                 main_game = Main()
         if event.type == pygame.KEYDOWN:
