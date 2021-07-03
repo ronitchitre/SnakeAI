@@ -8,11 +8,17 @@ cell_number = 20
 
 
 class Food:
-    def __init__(self):
+    def __init__(self, frontend = True):
         self.x = randint(0, cell_number - 1)
         self.y = randint(0, cell_number - 1)
         self.pos = Vector2(self.x, self.y)
-        self.pic = pygame.image.load("Graphics/apple.png").convert_alpha()
+        if frontend:
+            self.pic = pygame.image.load("Graphics/apple.png").convert_alpha()
+
+    # def __init__(self, _):
+    #     self.x = randint(0, cell_number - 1)
+    #     self.y = randint(0, cell_number - 1)
+    #     self.pos = Vector2(self.x, self.y)
 
     def draw_food(self, gameWindow):
         food_rect = pygame.Rect(int(self.pos.x * cell_size), int(self.pos.y * cell_size), cell_size, cell_size)
@@ -20,31 +26,36 @@ class Food:
 
 
 class Snake:
-    def __init__(self):
+    def __init__(self, frontend = True):
         self.body = [Vector2(10, 10), Vector2(10, 11), Vector2(10, 12)]
-        self.direction = Vector2(0, 0)
-        self.head_up = pygame.image.load("Graphics/head_up.png").convert_alpha()
-        self.head_down = pygame.image.load("Graphics/head_down.png").convert_alpha()
-        self.head_left = pygame.image.load("Graphics/head_left.png").convert_alpha()
-        self.head_right = pygame.image.load("Graphics/head_right.png").convert_alpha()
+        self.direction = Vector2(0, -1)
+        if frontend:
+            self.head_up = pygame.image.load("Graphics/head_up.png").convert_alpha()
+            self.head_down = pygame.image.load("Graphics/head_down.png").convert_alpha()
+            self.head_left = pygame.image.load("Graphics/head_left.png").convert_alpha()
+            self.head_right = pygame.image.load("Graphics/head_right.png").convert_alpha()
 
-        self.bod_ver = pygame.image.load("Graphics/body_vertical.png").convert_alpha()
-        self.bod_hor = pygame.image.load("Graphics/body_horizontal.png").convert_alpha()
+            self.bod_ver = pygame.image.load("Graphics/body_vertical.png").convert_alpha()
+            self.bod_hor = pygame.image.load("Graphics/body_horizontal.png").convert_alpha()
 
-        self.tail_up = pygame.image.load("Graphics/tail_down.png").convert_alpha()
-        self.tail_down = pygame.image.load("Graphics/tail_up.png").convert_alpha()
-        self.tail_left = pygame.image.load("Graphics/tail_right.png").convert_alpha()
-        self.tail_right = pygame.image.load("Graphics/tail_left.png").convert_alpha()
+            self.tail_up = pygame.image.load("Graphics/tail_down.png").convert_alpha()
+            self.tail_down = pygame.image.load("Graphics/tail_up.png").convert_alpha()
+            self.tail_left = pygame.image.load("Graphics/tail_right.png").convert_alpha()
+            self.tail_right = pygame.image.load("Graphics/tail_left.png").convert_alpha()
 
-        self.snake_corner1 = pygame.image.load("Graphics/body_bl.png").convert_alpha()
-        self.snake_corner2 = pygame.image.load("Graphics/body_br.png").convert_alpha()
-        self.snake_corner3 = pygame.image.load("Graphics/body_tr.png").convert_alpha()
-        self.snake_corner4 = pygame.image.load("Graphics/body_tl.png").convert_alpha()
+            self.snake_corner1 = pygame.image.load("Graphics/body_bl.png").convert_alpha()
+            self.snake_corner2 = pygame.image.load("Graphics/body_br.png").convert_alpha()
+            self.snake_corner3 = pygame.image.load("Graphics/body_tr.png").convert_alpha()
+            self.snake_corner4 = pygame.image.load("Graphics/body_tl.png").convert_alpha()
 
-        self.head = pygame.image.load("Graphics/head_up.png").convert_alpha()
-        self.tail = pygame.image.load("Graphics/tail_up.png").convert_alpha()
+            self.head = pygame.image.load("Graphics/head_up.png").convert_alpha()
+            self.tail = pygame.image.load("Graphics/tail_up.png").convert_alpha()
 
-        self.crunch_sound = pygame.mixer.Sound("Sound/crunch.wav")
+            self.crunch_sound = pygame.mixer.Sound("Sound/crunch.wav")
+
+    # def __init__(self, _):
+    #     self.body = [Vector2(10, 10), Vector2(10, 11), Vector2(10, 12)]
+    #     self.direction = Vector2(0, 0)
 
     def draw_snake(self, gameWindow):
         self.update_head()
@@ -84,31 +95,46 @@ class Snake:
         if action == "front":
             body_copy = self.body[:-1]
             body_copy.insert(0, body_copy[0] + self.direction)
-            return body_copy
+            temp = Snake(False)
+            temp.body = body_copy
+            temp.direction = self.direction
+            return temp
         elif action == "right":
             new_direction = self.direction.rotate(90)
             body_copy = self.body[:-1]
             body_copy.insert(0, body_copy[0] + new_direction)
-            return body_copy
+            temp = Snake(False)
+            temp.body = body_copy
+            temp.direction = self.direction
+            return temp
         elif action == "left":
             new_direction = self.direction.rotate(-90)
             body_copy = self.body[:-1]
             body_copy.insert(0, body_copy[0] + new_direction)
-            return body_copy
-        elif action = "topleft":
+            temp = Snake(False)
+            temp.body = body_copy
+            temp.direction = self.direction
+            return temp
+        elif action == "topleft":
             body_copy = self.body[:-1]
             body_copy.insert(0, body_copy[0] + self.direction)
             new_direction = self.direction.rotate(-90)
             body_copy = self.body[:-1]
             body_copy.insert(0, body_copy[0] + new_direction)
-            return body_copy
-        elif action = "topright":
+            temp = Snake(False)
+            temp.body = body_copy
+            temp.direction = self.direction
+            return temp
+        elif action == "topright":
             body_copy = self.body[:-1]
             body_copy.insert(0, body_copy[0] + self.direction)
             new_direction = self.direction.rotate(90)
             body_copy = self.body[:-1]
             body_copy.insert(0, body_copy[0] + new_direction)
-            return body_copy
+            temp = Snake(False)
+            temp.body = body_copy
+            temp.direction = self.direction
+            return temp
     
 
     def add_block(self):
@@ -119,7 +145,7 @@ class Snake:
     def check_death(self):
         if self.body[0].x > (cell_number - 1) or self.body[0].x < 0 or self.body[0].y > (cell_number - 1) or self.body[0].y < 0:
             return 1
-        elif self.body[0] in self.body[1:] and self.direction != Vector2(0, 0):
+        elif self.body[0] in self.body[1:]:
             return 1
         else:
             return 0
