@@ -118,9 +118,9 @@ class Snake:
     
 
     def add_block(self):
-        body_copy = self.body[:]
-        body_copy.insert(0, body_copy[0] + self.direction)
-        self.body = body_copy
+        tail_direction = self.body[-2] - self.body[-1]
+        new_block = self.body[-1] + tail_direction
+        self.body.append(new_block)
 
     def check_death(self):
         if self.body[0].x > (cell_number - 1) or self.body[0].x < 0 or self.body[0].y > (cell_number - 1) or self.body[0].y < 0:

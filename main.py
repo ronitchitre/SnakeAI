@@ -5,7 +5,7 @@ from pygame.math import Vector2
 import numpy as np
 import classes
 from backend import State, check_state,e_greedy_policy
-print("imports done")
+
 
 # initialize pygame
 pygame.mixer.init()
@@ -50,9 +50,8 @@ class Main:
             self.snake.add_block()
             self.score += 1
             self.snake.crunch_sound.play()
-            for block in self.snake.body[1:]:
-                if block == self.food.pos:
-                    self.food = classes.Food()
+            while self.food.pos in self.snake.body:
+                self.food = classes.Food()
 
     def get_matrix(self, address):
         state_action_matrix = []
@@ -82,10 +81,12 @@ score = 0
 score_color = colors.red
 fps = 60
 SCREEN_UPDATE = pygame.USEREVENT
-pygame.time.set_timer(SCREEN_UPDATE, 150)
+pygame.time.set_timer(SCREEN_UPDATE, 60)
+solution_address = r"solutions\1000.txt"
+high_score_address = r'high_score.txt'
 
 main_game = Main()
-main_game.get_matrix(r"solutions\50000.txt")
+main_game.get_matrix(solution_address)
 
 while not game_quite:
     state_action_matrix = main_game.state_action_matrix
@@ -94,11 +95,16 @@ while not game_quite:
             game_quite = True
         if event.type == SCREEN_UPDATE:
             main_game.update()
-            # game_over = main_game.snake.check_death()
-            # game_over == main_game.snake.check_death() is 1
             if main_game.snake.check_death() == 1:
+                file = open(high_score_address, 'r')
+                high_score = int(file.read())
+                file.close()
+                if main_game.score > high_score:
+                    file = open(high_score_address, '+w')
+                    file.write(str(main_game.score))
+                    file.close()
                 main_game = Main()
-                main_game.get_matrix(r"solutions\50000.txt")
+                main_game.get_matrix(solution_address)
         if event.type == pygame.KEYDOWN:
             main_game.game_start = True
             if event.key == pygame.K_DOWN:
@@ -120,17 +126,12 @@ while not game_quite:
         cur_state = check_state(main_game.food, main_game.snake)
         cur_state_index = cur_state.index
         check_array = state_action_matrix[cur_state_index]
-        print(check_array)
         optimal_action = e_greedy_policy(state_action_matrix, cur_state_index)[0]
-        print(optimal_action)
         if optimal_action == 0:
             main_game.snake.direction = main_game.snake.direction.rotate(-90)
         elif optimal_action == 2:
             main_game.snake.direction = main_game.snake.direction.rotate(90) 
-        # elif optimal_action == 1:
-            # main_game.snake.move_snake()
 
-    main_game.update()
     main_game.draw_stuff()
 
 
@@ -139,5 +140,3 @@ while not game_quite:
 
 pygame.quit()
 quit()
-# x = get_matrix(r"solutions\10.txt")
-# print(x)

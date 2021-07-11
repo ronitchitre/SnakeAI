@@ -3,7 +3,7 @@ import classes
 import numpy as np
 from random import random
 from random import randint
-print("hi")
+
 
 # food_pos is food position
 # snake_pos is array of blocks that the snake occupies
@@ -52,20 +52,6 @@ def decimal_to_binary(decimal):
 	while len(binary) < 7:
 		binary.append(0)
 	return binary
-
-
-# def move_snake(action, snakepos):
-# 	body_copy = snakepos[:-1]
-# 	body_copy.insert(0, body_copy[0] + action)
-# 	return body_copy
-
-# def check_death(snakepos, snakedir):
-# 	if snakepos[0].x > 19 or snakepos[0].x < 0 or snakepos[0].y > 19 or snakepos[0].y < 0:
-# 		return 1
-# 	elif snakepos[0] in snakepos[1:] and snakedir != Vector2(0, 0):
-# 		return 1
-# 	else:
-# 		return 0
 		
 
 def check_state(food, snake):
@@ -126,16 +112,6 @@ def check_state(food, snake):
 
 	return State([left, front, right, foodup, fooddown, foodleft, foodright])
 
-
-
-# def make_state_set():
-# 	state_set = {}
-# 	for state_index in range(num_states):
-# 		state_index_binary = decimal_to_binary(state_index)
-# 		state = State(state_index_binary)
-# 		state_set[state.index] = state
-# 	return state_set
-
 def e_greedy_policy(state_action_matrix, state_index, e = 0):
 	if random() <= e:
 		explore = randint(0, 2)
@@ -152,7 +128,6 @@ def qlearning(max_iter, e):
 	# state_set = make_state_set()
 	state_action_matrix = np.zeros([num_states, 3])
 	i = 0
-	j = 0
 	snake = classes.Snake(False)
 	snake.direction = up
 	for _ in range(max_iter):
@@ -161,8 +136,6 @@ def qlearning(max_iter, e):
 		food = classes.Food(False)
 		cur_state = check_state(food, snake)
 		while True:
-			# action_index = e_greedy_policy(state_action_matrix, cur_state.index,)
-			# print(cur_state.index)
 			action_value = e_greedy_policy(state_action_matrix, cur_state.index, e)
 			action_index = action_value[0]
 			if action_index == 0:
@@ -179,26 +152,18 @@ def qlearning(max_iter, e):
 			reward = 0
 			if abs(snake.body[0].x - food.pos.x) == 1 and abs(snake.body[0].y - food.pos.y) == 1:
 				reward = 5
-			elif snake.body[0] == food.pos:
+			if snake.body[0] == food.pos:
 				reward = 500
-				# snake.add_block()
-				# break
-				# food = classes.Food(False)
 			if snake.check_death() == 1:
-				reward = -500
+				reward = -1000
 				food = classes.Food(False)
 				snake = classes.Snake(False)
-				j+=1
 			nxt_greedy_state_value = e_greedy_policy(state_action_matrix, nxt_state.index, 0)[1]
 			state_action_matrix[cur_state.index][action_index] += alpha*(reward + gamma*nxt_greedy_state_value - state_action_matrix[cur_state.index][action_index])
-			# print(cur_state.left, cur_state.topleft, cur_state.front, cur_state.topright, cur_state.right)
 			if reward == 500:
 				snake.add_block()
 				break
 			cur_state = nxt_state
-			# print(snake.body, snake.direction,food.pos,reward)
-			# print(len(snake.body))
-	print(j)
 	return state_action_matrix
 
 def write_file(state_action_matrix, max_iter):
@@ -212,7 +177,7 @@ def write_file(state_action_matrix, max_iter):
 	file.close()
 
 if __name__ == "__main__":
-	x = qlearning(50000, 0.1)
-	write_file(x, 50000)
+	max_iter = 300
+	x = qlearning(max_iter, 0.1)
+	write_file(x, max_iter)
 
-# print(decimal_to_binary(8))
