@@ -105,7 +105,7 @@ class Snake:
             body_copy.insert(0, body_copy[0] + new_direction)
             temp = Snake(False)
             temp.body = body_copy
-            temp.direction = self.direction
+            temp.direction = new_direction
             return temp
         elif action == "left":
             new_direction = self.direction.rotate(-90)
@@ -113,27 +113,7 @@ class Snake:
             body_copy.insert(0, body_copy[0] + new_direction)
             temp = Snake(False)
             temp.body = body_copy
-            temp.direction = self.direction
-            return temp
-        elif action == "topleft":
-            body_copy = self.body[:-1]
-            body_copy.insert(0, body_copy[0] + self.direction)
-            new_direction = self.direction.rotate(-90)
-            body_copy = self.body[:-1]
-            body_copy.insert(0, body_copy[0] + new_direction)
-            temp = Snake(False)
-            temp.body = body_copy
-            temp.direction = self.direction
-            return temp
-        elif action == "topright":
-            body_copy = self.body[:-1]
-            body_copy.insert(0, body_copy[0] + self.direction)
-            new_direction = self.direction.rotate(90)
-            body_copy = self.body[:-1]
-            body_copy.insert(0, body_copy[0] + new_direction)
-            temp = Snake(False)
-            temp.body = body_copy
-            temp.direction = self.direction
+            temp.direction = new_direction
             return temp
     
 

@@ -21,17 +21,17 @@ left = Vector2(-1, 0)
 num_states = 128
 alpha = 0.5
 e = 0.1
-gamma = 1
+gamma = 0.9
 
 class State:
 	def __init__(self,argstate):
 		self.left = argstate[0]
-		self.topleft = argstate[1]
-		self.front = argstate[2]
-		self.topright = argstate[3]
-		self.right = argstate[4]
-		self.foodx = argstate[5]
-		self.foody = argstate[6]
+		self.front = argstate[1]
+		self.right = argstate[2]
+		self.foodup = argstate[3]
+		self.fooddown = argstate[4]
+		self.foodright = argstate[5]
+		self.foodleft = argstate[6]
 		self.index = binary_to_decimal(argstate)
 
 def binary_to_decimal(binary):
@@ -53,6 +53,7 @@ def decimal_to_binary(decimal):
 		binary.append(0)
 	return binary
 
+
 # def move_snake(action, snakepos):
 # 	body_copy = snakepos[:-1]
 # 	body_copy.insert(0, body_copy[0] + action)
@@ -68,32 +69,74 @@ def decimal_to_binary(decimal):
 		
 
 def check_state(food, snake):
-    left = snake.move_snake_backend("left").check_death()
-    topleft = snake.move_snake_backend("topleft").check_death()
-    front = snake.move_snake_backend("front").check_death()
-    topright = snake.move_snake_backend("topright").check_death()
-    right = snake.move_snake_backend("right").check_death()
-    if food.pos.x >= snake.body[0].x:
-    	foodx = 1
-    else:
-    	foodx = 0
-    if food.pos.y <= snake.body[0].y:
-    	foody = 1
-    else:
-    	foody = 0
-    return State([left, topleft, front, topright, right, foodx, foody])
+	left = snake.move_snake_backend("left").check_death()
+	front = snake.move_snake_backend("front").check_death()
+	right = snake.move_snake_backend("right").check_death()
+	relative_pos = food.pos - snake.body[0]
+	rel_angle = snake.direction.angle_to(relative_pos)
+	rel_angle2 = rel_angle + 360
+	if food.pos == snake.body[0]:
+		foodup = 0
+		fooddown = 0
+		foodleft = 0
+		foodright = 0
+	if rel_angle == 0 or rel_angle == 360 or rel_angle2 == 0:
+		foodup = 1
+		fooddown = 0
+		foodleft = 0
+		foodright = 0
+	elif rel_angle == 180 or rel_angle2 == 180:
+		foodup = 0
+		fooddown = 1
+		foodleft = 0
+		foodright = 0
+	elif rel_angle == 90 or rel_angle2 == 90:
+		foodup = 0
+		fooddown = 0
+		foodleft = 0
+		foodright = 1
+	elif rel_angle == 270 or rel_angle2 == 270:
+		foodup = 0
+		fooddown = 0
+		foodleft = 1
+		foodright = 0
+	elif (rel_angle > 0 and rel_angle < 90) or (rel_angle2 > 0 and rel_angle2 < 90):
+		foodup = 1
+		fooddown = 0
+		foodleft = 0
+		foodright = 1
+	elif (rel_angle > 270 and rel_angle < 360) or (rel_angle2 > 270 and rel_angle2 < 360):
+		foodup = 1
+		fooddown = 0
+		foodleft = 1
+		foodright = 0
+	elif (rel_angle > 90 and rel_angle < 180) or (rel_angle2 > 90 and rel_angle2 < 180):
+		foodup = 0
+		fooddown = 1
+		foodleft = 0
+		foodright = 1
+	elif (rel_angle > 180 and rel_angle < 270) or (rel_angle2 > 180 and rel_angle2 < 270):
+		foodup = 0
+		fooddown = 1
+		foodleft = 1
+		foodright = 0
 
 
 
-def make_state_set():
-	state_set = {}
-	for state_index in range(num_states):
-		state_index_binary = decimal_to_binary(state_index)
-		state = State(state_index_binary)
-		state_set[state.index] = state
-	return state_set
 
-def e_greedy_policy(state_action_matrix, state_index):
+	return State([left, front, right, foodup, fooddown, foodleft, foodright])
+
+
+
+# def make_state_set():
+# 	state_set = {}
+# 	for state_index in range(num_states):
+# 		state_index_binary = decimal_to_binary(state_index)
+# 		state = State(state_index_binary)
+# 		state_set[state.index] = state
+# 	return state_set
+
+def e_greedy_policy(state_action_matrix, state_index, e = 0):
 	if random() <= e:
 		explore = randint(0, 2)
 		return [explore, state_action_matrix[state_index][explore]]
@@ -105,20 +148,22 @@ def e_greedy_policy(state_action_matrix, state_index):
 # state_set = make_state_set()
 # state_action_matrix = np.zeros([num_states, 3])
 
-def qlearning(max_iter):
+def qlearning(max_iter, e):
 	# state_set = make_state_set()
 	state_action_matrix = np.zeros([num_states, 3])
 	i = 0
+	j = 0
+	snake = classes.Snake(False)
+	snake.direction = up
 	for _ in range(max_iter):
 		i+=1
 		print(i)
-		snake = classes.Snake(False)
-		snake.direction = up
 		food = classes.Food(False)
 		cur_state = check_state(food, snake)
-		while snake.check_death() != 1:
-			# action_index = e_greedy_policy(state_action_matrix, cur_state.index)
-			action_value = e_greedy_policy(state_action_matrix, cur_state.index)
+		while True:
+			# action_index = e_greedy_policy(state_action_matrix, cur_state.index,)
+			# print(cur_state.index)
+			action_value = e_greedy_policy(state_action_matrix, cur_state.index, e)
 			action_index = action_value[0]
 			if action_index == 0:
 				snake.direction = snake.direction.rotate(-90)
@@ -131,17 +176,29 @@ def qlearning(max_iter):
 				snake.direction = snake.direction.rotate(90)
 				snake.move_snake()
 				nxt_state = check_state(food, snake)
-			reward = 1
-			if snake.body[0] == food.pos:
+			reward = 0
+			if abs(snake.body[0].x - food.pos.x) == 1 and abs(snake.body[0].y - food.pos.y) == 1:
 				reward = 5
-				snake.add_block()
-				food = classes.Food(False)
-			elif snake.check_death() == 1:
-				reward = -5
+			elif snake.body[0] == food.pos:
+				reward = 500
+				# snake.add_block()
+				# break
+				# food = classes.Food(False)
+			if snake.check_death() == 1:
+				reward = -500
 				food = classes.Food(False)
 				snake = classes.Snake(False)
-			state_action_matrix[cur_state.index][action_index] += alpha*(reward + gamma*action_value[1] - state_action_matrix[cur_state.index][action_index])
+				j+=1
+			nxt_greedy_state_value = e_greedy_policy(state_action_matrix, nxt_state.index, 0)[1]
+			state_action_matrix[cur_state.index][action_index] += alpha*(reward + gamma*nxt_greedy_state_value - state_action_matrix[cur_state.index][action_index])
+			# print(cur_state.left, cur_state.topleft, cur_state.front, cur_state.topright, cur_state.right)
+			if reward == 500:
+				snake.add_block()
+				break
 			cur_state = nxt_state
+			# print(snake.body, snake.direction,food.pos,reward)
+			# print(len(snake.body))
+	print(j)
 	return state_action_matrix
 
 def write_file(state_action_matrix, max_iter):
@@ -155,5 +212,7 @@ def write_file(state_action_matrix, max_iter):
 	file.close()
 
 if __name__ == "__main__":
-	x = qlearning(25)
-	write_file(x, 25)
+	x = qlearning(50000, 0.1)
+	write_file(x, 50000)
+
+# print(decimal_to_binary(8))
