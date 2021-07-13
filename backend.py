@@ -3,6 +3,8 @@ import classes
 import numpy as np
 from random import random
 from random import randint
+import argparse
+parser = argparse.ArgumentParser()
 
 
 # food_pos is food position
@@ -22,6 +24,9 @@ num_states = 128
 alpha = 0.5
 e = 0.1
 gamma = 0.9
+reward_food_close = 5
+reward_food = 500
+reward_death = -1000
 
 class State:
 	def __init__(self,argstate):
@@ -120,9 +125,20 @@ def e_greedy_policy(state_action_matrix, state_index, e = 0):
 		check_array = state_action_matrix[state_index]
 		return [np.random.choice(np.flatnonzero(np.isclose(check_array, check_array.max()))), np.argmax(check_array)]
 
+def reward_func(snake, food):
+	reward = 0
+	if abs(snake.body[0].x - food.pos.x) == 1 and abs(snake.body[0].y - food.pos.y) == 1:
+		reward = reward_food_close
+	if snake.body[0] == food.pos:
+		reward = reward_food
+	if snake.check_death() == 1:
+		reward = reward_death
+	return reward
 
-# state_set = make_state_set()
-# state_action_matrix = np.zeros([num_states, 3])
+def expected_value(state_action_matrix, state_index,e):
+	array = state_action_matrix[state_index]
+	return e*(0.25*array[0] + 0.25*array[1] + 0.25*array[2]) + (1 - e)*(np.argmax(array))
+
 
 def qlearning(max_iter, e):
 	# state_set = make_state_set()
@@ -138,36 +154,88 @@ def qlearning(max_iter, e):
 		while True:
 			action_value = e_greedy_policy(state_action_matrix, cur_state.index, e)
 			action_index = action_value[0]
-			if action_index == 0:
-				snake.direction = snake.direction.rotate(-90)
-				snake.move_snake()
-				nxt_state = check_state(food, snake)
-			elif action_index == 1:
-				snake.move_snake()
-				nxt_state = check_state(food, snake)
-			elif action_index == 2:
-				snake.direction = snake.direction.rotate(90)
-				snake.move_snake()
-				nxt_state = check_state(food, snake)
-			reward = 0
-			if abs(snake.body[0].x - food.pos.x) == 1 and abs(snake.body[0].y - food.pos.y) == 1:
-				reward = 5
-			if snake.body[0] == food.pos:
-				reward = 500
-			if snake.check_death() == 1:
-				reward = -1000
-				food = classes.Food(False)
-				snake = classes.Snake(False)
+			snake.change_snake_dir(action_index)
+			snake.move_snake()
+			nxt_state = check_state(food, snake)
+			reward = reward_func(snake, food)
 			nxt_greedy_state_value = e_greedy_policy(state_action_matrix, nxt_state.index, 0)[1]
 			state_action_matrix[cur_state.index][action_index] += alpha*(reward + gamma*nxt_greedy_state_value - state_action_matrix[cur_state.index][action_index])
-			if reward == 500:
+			if reward == reward_food:
 				snake.add_block()
 				break
+			if reward == reward_death:
+				food = classes.Food(False)
+				snake = classes.Snake(False)
+				nxt_state = check_state(food, snake)
 			cur_state = nxt_state
 	return state_action_matrix
 
-def write_file(state_action_matrix, max_iter):
-	address = r"solutions\{}.txt".format(max_iter)
+
+def sarsa(max_iter, e):
+	state_action_matrix = np.zeros([num_states, 3])
+	i = 0
+	snake = classes.Snake(False)
+	snake.direction = up
+	for _ in range(max_iter):
+		i+=1
+		print(i)
+		food = classes.Food(False)
+		cur_state = check_state(food, snake)
+		action = e_greedy_policy(state_action_matrix, cur_state.index, e)
+		while True:
+			action_index = action[0]
+			snake.change_snake_dir(action_index)
+			snake.move_snake()
+			nxt_state = check_state(food, snake)
+			reward = reward_func(snake, food)
+			if reward == reward_death:
+				food = classes.Food(False)
+				snake = classes.Snake(False)
+				nxt_state = check_state(food, snake)
+				action_next = e_greedy_policy(state_action_matrix, nxt_state.index, e)
+			action_next = e_greedy_policy(state_action_matrix, nxt_state.index, e)
+			state_action_matrix[cur_state.index][action_index] += alpha*(reward + gamma*state_action_matrix[nxt_state.index][action_next[0]] - state_action_matrix[cur_state.index][action_index])
+			if reward == reward_food:
+				snake.add_block()
+				break
+			cur_state = nxt_state
+			action = action_next
+	return state_action_matrix
+
+
+def expecsarsa(max_iter, e):
+	# state_set = make_state_set()
+	state_action_matrix = np.zeros([num_states, 3])
+	i = 0
+	snake = classes.Snake(False)
+	snake.direction = up
+	for _ in range(max_iter):
+		i+=1
+		print(i)
+		food = classes.Food(False)
+		cur_state = check_state(food, snake)
+		while True:
+			action_value = e_greedy_policy(state_action_matrix, cur_state.index, e)
+			action_index = action_value[0]
+			snake.change_snake_dir(action_index)
+			snake.move_snake()
+			nxt_state = check_state(food, snake)
+			reward = reward_func(snake, food)
+			nxt_expected_state_value = expected_value(state_action_matrix, nxt_state.index, e)
+			state_action_matrix[cur_state.index][action_index] += alpha*(reward + gamma*nxt_expected_state_value - state_action_matrix[cur_state.index][action_index])
+			if reward == reward_food:
+				snake.add_block()
+				break
+			if reward == reward_death:
+				food = classes.Food(False)
+				snake = classes.Snake(False)
+				nxt_state = check_state(food, snake)
+			cur_state = nxt_state
+	return state_action_matrix
+
+
+def write_file(state_action_matrix, max_iter, algorithm):
+	address = r"solutions\{}\{}.txt".format(algorithm,str(max_iter))
 	file = open(address, "+w")
 	for state_action in state_action_matrix:
 		for action in state_action:
@@ -177,7 +245,19 @@ def write_file(state_action_matrix, max_iter):
 	file.close()
 
 if __name__ == "__main__":
-	max_iter = 300
-	x = qlearning(max_iter, 0.1)
-	write_file(x, max_iter)
+	parser.add_argument('-m', '--maxiter', type = int)
+	parser.add_argument('-a', '--algorithm', type = str)
+	args = parser.parse_args()
+	if args.algorithm == 'qlearning':
+		x = qlearning(args.maxiter, e)
+		write_file(x, args.maxiter, args.algorithm)
+	elif args.algorithm == 'sarsa':
+		x = sarsa(args.maxiter, e)
+		write_file(x, args.maxiter, args.algorithm)
+	elif args.algorithm == 'expecsarsa':
+		x = expecsarsa(args.maxiter, e)
+		write_file(x, args.maxiter, args.algorithm)
+	else:
+		print('valid algorithms are qlearning, sarsa, expecsarsa')
+
 

@@ -115,6 +115,12 @@ class Snake:
             temp.body = body_copy
             temp.direction = new_direction
             return temp
+
+    def change_snake_dir(self, action_index):
+        if action_index == 0:
+            self.direction = self.direction.rotate(-90)
+        elif action_index == 2:
+            self.direction = self.direction.rotate(90)
     
 
     def add_block(self):

@@ -5,6 +5,8 @@ from pygame.math import Vector2
 import numpy as np
 import classes
 from backend import State, check_state,e_greedy_policy
+import argparse
+parser = argparse.ArgumentParser()
 
 
 # initialize pygame
@@ -31,7 +33,7 @@ class Main:
         self.score = 0
         bg_img = pygame.image.load("snakebg.jpg")
         self.bg_img = pygame.transform.scale(bg_img, (cell_number*cell_size, cell_number*cell_size))
-        self.game_start = False
+        self.game_start = True
 
     def update(self):
         if self.game_start:
@@ -82,7 +84,10 @@ score_color = colors.red
 fps = 60
 SCREEN_UPDATE = pygame.USEREVENT
 pygame.time.set_timer(SCREEN_UPDATE, 60)
-solution_address = r"solutions\1000.txt"
+parser.add_argument('-m', '--maxiter', type = str)
+parser.add_argument('-a', '--algorithm', type = str)
+args = parser.parse_args()
+solution_address = r"solutions\{}\{}.txt".format(args.algorithm, args.maxiter)
 high_score_address = r'high_score.txt'
 
 main_game = Main()
