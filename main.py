@@ -104,6 +104,24 @@ while not game_quite:
                 file = open(high_score_address, 'r')
                 high_score = int(file.read())
                 file.close()
+                try:
+                    file_avg = open(r"solutions\{}\average_{}.txt".format(args.algorithm, args.maxiter), 'r')
+                except:
+                    file_avg = open(r"solutions\{}\average_{}.txt".format(args.algorithm, args.maxiter), '+w')
+                    file_avg.write("0 0")
+                    file_avg.close()
+                    file_avg = open(r"solutions\{}\average_{}.txt".format(args.algorithm, args.maxiter), 'r')
+                avg_array = file_avg.read().split()
+                avg_array = list(map(float, avg_array))
+                cur_index = avg_array[1] + 1
+                cur_avg = (avg_array[0]*(cur_index - 1) + main_game.score)/cur_index
+                avg_array = [cur_avg, cur_index]
+                avg_array_string = list(map(str, avg_array))
+                avg_array_string = f"{avg_array_string[0]} {avg_array_string[1]}"
+                file_avg = open(r"solutions\{}\average_{}.txt".format(args.algorithm, args.maxiter), '+w')
+                file_avg.write(avg_array_string)
+                file_avg.close()
+
                 if main_game.score > high_score:
                     file = open(high_score_address, '+w')
                     file.write(str(main_game.score))

@@ -136,9 +136,20 @@ def reward_func(snake, food):
 	return reward
 
 def expected_value(state_action_matrix, state_index,e):
-	array = state_action_matrix[state_index]
-	return e*(0.25*array[0] + 0.25*array[1] + 0.25*array[2]) + (1 - e)*(np.argmax(array))
-
+	check_array = state_action_matrix[state_index]
+	max_value = np.argmax(check_array)
+	total_max = 0
+	for i in check_array:
+		if i == max_value:
+			total_max += 1
+	total_non_max = 3 - total_max
+	expected_value = 0
+	for i in check_array:
+		if i == max_value:
+			expected_value += (1 - e)*i*(1/total_max)
+		else:
+			expected_value += e*i*(1/total_non_max)
+	return expected_value
 
 def qlearning(max_iter, e):
 	# state_set = make_state_set()
@@ -168,6 +179,7 @@ def qlearning(max_iter, e):
 				snake = classes.Snake(False)
 				nxt_state = check_state(food, snake)
 			cur_state = nxt_state
+		
 	return state_action_matrix
 
 
@@ -188,18 +200,19 @@ def sarsa(max_iter, e):
 			snake.move_snake()
 			nxt_state = check_state(food, snake)
 			reward = reward_func(snake, food)
-			if reward == reward_death:
-				food = classes.Food(False)
-				snake = classes.Snake(False)
-				nxt_state = check_state(food, snake)
-				action_next = e_greedy_policy(state_action_matrix, nxt_state.index, e)
 			action_next = e_greedy_policy(state_action_matrix, nxt_state.index, e)
 			state_action_matrix[cur_state.index][action_index] += alpha*(reward + gamma*state_action_matrix[nxt_state.index][action_next[0]] - state_action_matrix[cur_state.index][action_index])
 			if reward == reward_food:
 				snake.add_block()
 				break
+			if reward == reward_death:
+				food = classes.Food(False)
+				snake = classes.Snake(False)
+				nxt_state = check_state(food, snake)
+				action_next = e_greedy_policy(state_action_matrix, nxt_state.index, e)
 			cur_state = nxt_state
 			action = action_next
+		e *= 0.99
 	return state_action_matrix
 
 
@@ -231,6 +244,7 @@ def expecsarsa(max_iter, e):
 				snake = classes.Snake(False)
 				nxt_state = check_state(food, snake)
 			cur_state = nxt_state
+		e *= 0.99
 	return state_action_matrix
 
 
